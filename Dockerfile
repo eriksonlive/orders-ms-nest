@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm install
 
 # Copia el resto de los archivos del proyecto
-COPY ./build /usr/share/nginx/html
+COPY ./dist /usr/share/nginx/html
 
 # Ejecuta prisma generate para generar el cliente
 RUN npx prisma generate
