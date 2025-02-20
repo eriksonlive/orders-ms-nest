@@ -9,15 +9,15 @@
     
     # Instala todas las dependencias necesarias para construir la aplicación
     RUN npm install
+
+    # Genera el cliente de Prisma (si es necesario)
+    RUN npx prisma generate
     
     # Copia el resto del código fuente al contenedor
     COPY . .
     
     # Ejecuta el proceso de build para generar la carpeta 'dist'
     RUN npm run build
-    
-    # Genera el cliente de Prisma (si es necesario)
-    RUN npx prisma generate
     
     # -----------------------------
     # Etapa 2: Imagen de producción para orders-ms
