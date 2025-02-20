@@ -4,19 +4,16 @@
     FROM node:22-alpine AS builder
     WORKDIR /app
     
-    # Copia el package.json y package-lock.json (si existe)
+    # Copia package.json y package-lock.json (si existe)
     COPY package*.json ./
     
-    # Instala todas las dependencias necesarias para construir la aplicación
+    # Instala todas las dependencias necesarias (incluidas devDependencies)
     RUN npm install
-
-    # Genera el cliente de Prisma (si es necesario)
-    RUN npx prisma generate
     
-    # Copia el resto del código fuente al contenedor
+    # Copia el resto del código fuente
     COPY . .
     
-    # Ejecuta el proceso de build para generar la carpeta 'dist'
+    # Ejecuta el proceso de build
     RUN npm run build
     
     # -----------------------------
@@ -25,18 +22,23 @@
     FROM node:22-alpine
     WORKDIR /app
     
-    # Copia el package.json para instalar sólo las dependencias de producción
+    # Copia el package.json para instalar solo las dependencias de producción
     COPY package*.json ./
     
-    # Instala las dependencias de producción
+    # Instala solo las dependencias de producción
     RUN npm install --production
     
-    # Copia la carpeta 'dist' generada en la etapa de build a la imagen final
+    # Copia la carpeta 'dist' generada en la etapa de build
     COPY --from=builder /app/dist ./dist
     
-    # Expone el puerto en el que corre la aplicación (ajusta según tu configuración; aquí se usa 3002)
+    # 🔹 Copia la carpeta prisma/ para que exista en producción
+    COPY --from=builder /app/prisma ./prisma
+    
+    # 🔹 Genera el cliente de Prisma en producción
+    RUN npx prisma generate
+    
+    # Expone el puerto en el que corre la aplicación
     EXPOSE 3002
     
-    # Comando para iniciar la aplicación; asegúrate de que en package.json el script "start" ejecute, por ejemplo, "node dist/main.js"
+    # Comando para iniciar la aplicación
     CMD ["node", "dist/main.js"]
-    
